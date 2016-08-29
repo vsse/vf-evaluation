@@ -1,0 +1,26 @@
+import Promise from 'bluebird';
+import mongoose from 'mongoose';
+import config from './config/env';
+import app from './config/express';
+import dotenv from 'dotenv';
+
+// promisify mongoose
+Promise.promisifyAll(mongoose);
+
+// connect to mongo db
+mongoose.connect(config.db, { server: { socketOptions: { keepAlive: 1 } } });
+mongoose.connection.on('error', () => {
+  throw new Error(`unable to connect to database: ${config.db}`);
+});
+
+const debug = require('debug')('vf-evaluation:index');
+
+// listen on port config.port
+app.listen(config.port, () => {
+  debug(`Server started on port ${config.port} (${config.env})`);
+});
+
+// load all environment variables from .env file
+dotenv.config();
+
+export default app;
